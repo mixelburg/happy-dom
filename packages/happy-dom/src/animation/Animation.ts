@@ -183,6 +183,8 @@ export default class Animation extends EventTarget {
 
 	/**
 	 * Cancels playback.
+	 *
+	 * @see https://www.w3.org/TR/web-animations-1/#canceling-an-animation-section
 	 */
 	public cancel(): void {
 		if (this.#playState === 'idle') {
@@ -192,12 +194,19 @@ export default class Animation extends EventTarget {
 		this.#playState = 'idle';
 		this.#currentTime = null;
 		this.startTime = null;
+
+		// The finished promise is usually never consumed, so the rejection below would otherwise be
+		// reported as an unhandled rejection in Node.
+		this.finished.catch(() => {});
+
 		this.#rejectFinished?.(
 			new this[PropertySymbol.window].DOMException(
 				'The animation was canceled.',
 				DOMExceptionNameEnum.abortError
 			)
 		);
+
+		this.finished = this.#createFinishedPromise();
 		this.dispatchEvent(new this[PropertySymbol.window].Event('cancel'));
 	}
 

@@ -113,6 +113,35 @@ describe('Animation', () => {
 			expect(listener).toHaveBeenCalledOnce();
 			await expect(finished).rejects.toMatchObject({ name: 'AbortError' });
 		});
+
+		it('Replaces the finished promise.', async () => {
+			animation.play();
+			const finished = animation.finished;
+
+			animation.cancel();
+
+			expect(animation.finished).not.toBe(finished);
+		});
+
+		it('Does not report the finished promise as an unhandled rejection when it is not consumed.', async () => {
+			const unhandledRejections: unknown[] = [];
+			const onUnhandledRejection = (reason: unknown): void => {
+				unhandledRejections.push(reason);
+			};
+
+			process.on('unhandledRejection', onUnhandledRejection);
+
+			try {
+				animation.play();
+				animation.cancel();
+
+				await new Promise((resolve) => setTimeout(resolve, 0));
+			} finally {
+				process.off('unhandledRejection', onUnhandledRejection);
+			}
+
+			expect(unhandledRejections).toEqual([]);
+		});
 	});
 
 	describe('reverse()', () => {
