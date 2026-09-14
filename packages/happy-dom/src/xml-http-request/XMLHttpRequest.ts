@@ -341,7 +341,10 @@ export default class XMLHttpRequest extends XMLHttpRequestEventTarget {
 			return;
 		}
 		this.#aborted = true;
-		this.#abortController!.abort();
+
+		// The abort controller is created by open(), so a request that hasn't been
+		// opened yet has nothing to abort.
+		this.#abortController?.abort();
 	}
 
 	/**

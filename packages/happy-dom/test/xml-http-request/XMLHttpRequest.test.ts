@@ -1318,6 +1318,11 @@ describe('XMLHttpRequest', () => {
 	});
 
 	describe('abort()', () => {
+		it('Does nothing when the request has not been opened.', () => {
+			expect(() => request.abort()).not.toThrow();
+			expect(request.readyState).toBe(XMLHttpRequestReadyStateEnum.unsent);
+		});
+
 		it('Aborts an asynchronous request.', async () => {
 			return await new Promise((resolve) => {
 				let isAborted = false;
