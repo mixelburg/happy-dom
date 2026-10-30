@@ -113,6 +113,19 @@ describe('Animation', () => {
 			expect(listener).toHaveBeenCalledOnce();
 			await expect(finished).rejects.toMatchObject({ name: 'AbortError' });
 		});
+
+		it('Marks the rejected finished promise as handled.', async () => {
+			const unhandled = vi.fn();
+			process.on('unhandledRejection', unhandled);
+
+			animation.play();
+			animation.cancel();
+
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			process.off('unhandledRejection', unhandled);
+
+			expect(unhandled).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('reverse()', () => {

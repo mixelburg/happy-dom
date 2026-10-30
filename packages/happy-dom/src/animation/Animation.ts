@@ -198,6 +198,9 @@ export default class Animation extends EventTarget {
 				DOMExceptionNameEnum.abortError
 			)
 		);
+		// The spec marks the current finished promise as handled when it is rejected by a cancel, so that a
+		// canceled animation without a handler on "finished" doesn't surface as an unhandled rejection.
+		this.finished.catch(() => {});
 		this.dispatchEvent(new this[PropertySymbol.window].Event('cancel'));
 	}
 
